@@ -1,36 +1,56 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Calendar, MapPin, Clock, ArrowRight } from "lucide-react";
 
-const events = [
-  {
-    id: 1,
-    title: "Weekend Kirtan Session",
-    date: "December 7, 2025",
-    time: "6:00 PM - 9:00 PM",
-    location: "Community Hall, Mumbai",
-    description: "Join us for an evening of soulful kirtan and bhajans. All are welcome!",
-    featured: true,
-  },
-  {
-    id: 2,
-    title: "New Year Special Bhajan Night",
-    date: "December 31, 2025",
-    time: "10:00 PM - 1:00 AM",
-    location: "Temple Grounds",
-    description: "Welcome the new year with divine music and positive vibrations.",
-    featured: false,
-  },
-  {
-    id: 3,
-    title: "Monthly Community Jam",
-    date: "January 14, 2026",
-    time: "5:00 PM - 8:00 PM",
-    location: "Open Air Venue",
-    description: "Our regular monthly gathering for devotional music lovers.",
-    featured: false,
-  },
-];
+interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  date: string;
+  time_start: string;
+  time_end: string | null;
+  location: string;
+  featured: boolean;
+}
 
 const EventsSection = () => {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .gte("date", new Date().toISOString().split("T")[0])
+        .order("date", { ascending: true })
+        .limit(3);
+
+      if (!error && data) {
+        setEvents(data);
+      }
+      setLoading(false);
+    };
+
+    fetchEvents();
+  }, []);
+
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return {
+      day: date.getDate(),
+      month: date.toLocaleString("en", { month: "short" }),
+    };
+  };
+
   return (
     <section id="events" className="py-20 md:py-32 bg-background">
       <div className="container mx-auto px-4">
@@ -49,58 +69,75 @@ const EventsSection = () => {
         </div>
 
         {/* Events List */}
-        <div className="space-y-6 max-w-4xl mx-auto">
-          {events.map((event, index) => (
-            <div
-              key={event.id}
-              className={`group relative p-6 md:p-8 rounded-2xl border transition-all duration-300 hover:-translate-y-1 ${
-                event.featured
-                  ? "bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30"
-                  : "bg-card border-border"
-              }`}
-            >
-              {event.featured && (
-                <span className="absolute top-4 right-4 px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full">
-                  Featured
-                </span>
-              )}
+        {loading ? (
+          <div className="text-center text-muted-foreground">Loading events...</div>
+        ) : events.length === 0 ? (
+          <div className="text-center text-muted-foreground max-w-md mx-auto">
+            <p>No upcoming events scheduled at the moment. Follow us on Instagram for updates!</p>
+          </div>
+        ) : (
+          <div className="space-y-6 max-w-4xl mx-auto">
+            {events.map((event) => {
+              const { day, month } = formatDate(event.date);
+              const timeRange = event.time_end
+                ? `${formatTime(event.time_start)} - ${formatTime(event.time_end)}`
+                : formatTime(event.time_start);
 
-              <div className="flex flex-col md:flex-row md:items-center gap-6">
-                {/* Date Box */}
-                <div className="flex-shrink-0 w-20 h-20 bg-secondary text-secondary-foreground rounded-xl flex flex-col items-center justify-center">
-                  <span className="text-2xl font-bold">{event.date.split(" ")[1].replace(",", "")}</span>
-                  <span className="text-xs uppercase">{event.date.split(" ")[0]}</span>
-                </div>
+              return (
+                <div
+                  key={event.id}
+                  className={`group relative p-6 md:p-8 rounded-2xl border transition-all duration-300 hover:-translate-y-1 ${
+                    event.featured
+                      ? "bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30"
+                      : "bg-card border-border"
+                  }`}
+                >
+                  {event.featured && (
+                    <span className="absolute top-4 right-4 px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full">
+                      Featured
+                    </span>
+                  )}
 
-                {/* Event Details */}
-                <div className="flex-grow">
-                  <h3 className="font-display font-semibold text-xl md:text-2xl text-secondary mb-2">
-                    {event.title}
-                  </h3>
-                  <p className="text-muted-foreground mb-4">{event.description}</p>
-                  
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-primary" />
-                      <span>{event.time}</span>
+                  <div className="flex flex-col md:flex-row md:items-center gap-6">
+                    {/* Date Box */}
+                    <div className="flex-shrink-0 w-20 h-20 bg-secondary text-secondary-foreground rounded-xl flex flex-col items-center justify-center">
+                      <span className="text-2xl font-bold">{day}</span>
+                      <span className="text-xs uppercase">{month}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-primary" />
-                      <span>{event.location}</span>
+
+                    {/* Event Details */}
+                    <div className="flex-grow">
+                      <h3 className="font-display font-semibold text-xl md:text-2xl text-secondary mb-2">
+                        {event.title}
+                      </h3>
+                      {event.description && (
+                        <p className="text-muted-foreground mb-4">{event.description}</p>
+                      )}
+
+                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-primary" />
+                          <span>{timeRange}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-primary" />
+                          <span>{event.location}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Arrow */}
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                        <ArrowRight className="w-5 h-5" />
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Arrow */}
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                    <ArrowRight className="w-5 h-5" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* CTA */}
         <div className="text-center mt-12">

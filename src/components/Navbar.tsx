@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Menu, X, Instagram } from "lucide-react";
+import { Menu, X, Instagram, Lock } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/logo.jpeg";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isAdmin } = useAuth();
 
   const navLinks = [
     { name: "Home", href: "#home" },
@@ -45,6 +47,15 @@ const Navbar = () => {
               <Instagram className="w-4 h-4" />
               <span className="text-sm font-medium">Follow Us</span>
             </a>
+            {user && isAdmin && (
+              <a
+                href="/admin"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Lock className="w-4 h-4" />
+                Admin
+              </a>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -80,6 +91,16 @@ const Navbar = () => {
                 <Instagram className="w-4 h-4" />
                 <span className="text-sm font-medium">Follow Us</span>
               </a>
+              {user && isAdmin && (
+                <a
+                  href="/admin"
+                  className="flex items-center gap-2 text-base font-medium text-muted-foreground hover:text-primary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Lock className="w-4 h-4" />
+                  Admin Panel
+                </a>
+              )}
             </div>
           </div>
         )}
