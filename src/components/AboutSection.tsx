@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { Music, Users, Heart, Mic2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const features = [
   {
@@ -24,6 +26,20 @@ const features = [
 ];
 
 const AboutSection = () => {
+  const [settings, setSettings] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase.from("site_settings").select("*");
+      if (data) {
+        const map: Record<string, string> = {};
+        data.forEach((s) => (map[s.key] = s.value));
+        setSettings(map);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   return (
     <section id="about" className="py-20 md:py-32 bg-card">
       <div className="container mx-auto px-4">
@@ -37,8 +53,7 @@ const AboutSection = () => {
             <span className="text-gradient"> Devotional Music</span>
           </h2>
           <p className="text-muted-foreground text-lg">
-            Bhakti Jamming Crew is a passionate group of musicians and devotees united by our love for spiritual music. 
-            We believe in the transformative power of kirtan and bhajan to bring peace, joy, and connection to all.
+            {settings.about_description || "Bhakti Jamming Crew is a passionate group of musicians and devotees united by our love for spiritual music. We believe in the transformative power of kirtan and bhajan to bring peace, joy, and connection to all."}
           </p>
         </div>
 
@@ -68,8 +83,7 @@ const AboutSection = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-3xl" />
           <div className="relative p-8 md:p-12 text-center">
             <blockquote className="font-display text-2xl md:text-3xl text-secondary italic max-w-4xl mx-auto">
-              "Music is the language of the soul. When we jam together in devotion, 
-              we create a bridge between the earthly and the divine."
+              "{settings.mission_quote || "Music is the language of the soul. When we jam together in devotion, we create a bridge between the earthly and the divine."}"
             </blockquote>
             <p className="mt-6 text-muted-foreground font-medium">— Bhakti Jamming Crew</p>
           </div>

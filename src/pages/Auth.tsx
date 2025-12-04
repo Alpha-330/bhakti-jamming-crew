@@ -66,7 +66,7 @@ const Auth = () => {
           Back to home
         </a>
 
-        <div className="bg-card rounded-2xl p-8 shadow-card border border-border">
+        <div className="bg-card rounded-2xl p-8 shadow-card border border-border overflow-hidden">
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <img
@@ -76,12 +76,41 @@ const Auth = () => {
             />
           </div>
 
+          {/* Toggle Slider */}
+          <div className="relative bg-muted rounded-xl p-1 mb-8">
+            <div
+              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-primary rounded-lg transition-all duration-300 ease-out ${
+                isLogin ? "left-1" : "left-[calc(50%+2px)]"
+              }`}
+            />
+            <div className="relative grid grid-cols-2 gap-1">
+              <button
+                type="button"
+                onClick={() => setIsLogin(true)}
+                className={`py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 ${
+                  isLogin ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsLogin(false)}
+                className={`py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 ${
+                  !isLogin ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Sign Up
+              </button>
+            </div>
+          </div>
+
           <h1 className="font-display font-bold text-2xl text-center text-secondary mb-2">
-            {isLogin ? "Admin Login" : "Create Account"}
+            {isLogin ? "Welcome Back" : "Create Account"}
           </h1>
           <p className="text-muted-foreground text-center text-sm mb-8">
             {isLogin
-              ? "Sign in to manage your website"
+              ? "Sign in to access the admin panel"
               : "Register to get started"}
           </p>
 
@@ -136,17 +165,6 @@ const Auth = () => {
               {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
             </button>
           </form>
-
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Sign in"}
-            </button>
-          </div>
         </div>
       </div>
     </div>
