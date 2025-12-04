@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, Calendar, Settings, Plus, Edit2, Trash2, ArrowLeft, Save } from "lucide-react";
+import { LogOut, Calendar, Settings, Plus, Edit2, Trash2, ArrowLeft, Save, Users, IndianRupee } from "lucide-react";
 import logo from "@/assets/logo.jpeg";
 
 interface Event {
@@ -15,6 +15,8 @@ interface Event {
   time_end: string | null;
   location: string;
   featured: boolean;
+  price: number | null;
+  max_attendees: number | null;
 }
 
 interface SiteSetting {
@@ -78,6 +80,9 @@ const Admin = () => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    const priceValue = formData.get("price") as string;
+    const maxAttendeesValue = formData.get("max_attendees") as string;
+
     const eventData = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
@@ -86,6 +91,8 @@ const Admin = () => {
       time_end: formData.get("time_end") as string || null,
       location: formData.get("location") as string,
       featured: formData.get("featured") === "on",
+      price: priceValue ? parseInt(priceValue) : null,
+      max_attendees: maxAttendeesValue ? parseInt(maxAttendeesValue) : null,
     };
 
     if (editingEvent) {
@@ -316,6 +323,36 @@ const Admin = () => {
                       />
                     </div>
                   </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                        <IndianRupee className="w-4 h-4" />
+                        Price (₹)
+                      </label>
+                      <input
+                        name="price"
+                        type="number"
+                        min="0"
+                        defaultValue={editingEvent?.price || ""}
+                        placeholder="Leave empty for free event"
+                        className="w-full px-4 py-2 bg-background border border-border rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Max Attendees
+                      </label>
+                      <input
+                        name="max_attendees"
+                        type="number"
+                        min="1"
+                        defaultValue={editingEvent?.max_attendees || ""}
+                        placeholder="Leave empty for unlimited"
+                        className="w-full px-4 py-2 bg-background border border-border rounded-lg"
+                      />
+                    </div>
+                  </div>
                   <div className="flex items-center gap-2">
                     <input
                       name="featured"
@@ -354,12 +391,26 @@ const Admin = () => {
                   key={event.id}
                   className="bg-card rounded-xl border border-border p-4 flex items-center justify-between"
                 >
-                  <div>
-                    <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-secondary">{event.title}</h3>
                       {event.featured && (
                         <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full">
                           Featured
+                        </span>
+                      )}
+                      {event.price && event.price > 0 ? (
+                        <span className="px-2 py-0.5 bg-accent/10 text-accent text-xs rounded-full">
+                          ₹{event.price}
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 bg-green-500/10 text-green-600 text-xs rounded-full">
+                          Free
+                        </span>
+                      )}
+                      {event.max_attendees && (
+                        <span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs rounded-full">
+                          Max: {event.max_attendees}
                         </span>
                       )}
                     </div>
@@ -383,6 +434,11 @@ const Admin = () => {
                   </div>
                 </div>
               ))}
+              {events.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">
+                  No events yet. Click "Add Event" to create one.
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -394,47 +450,54 @@ const Admin = () => {
               Site Settings
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 space-y-6">
-              {settings.map((setting) => (
-                <div key={setting.id}>
-                  <label className="block text-sm font-medium mb-2 capitalize">
-                    {setting.key.replace(/_/g, " ")}
-                  </label>
-                  {setting.key.includes("text") ||
-                  setting.key.includes("subtitle") ||
-                  setting.key.includes("quote") ? (
-                    <textarea
-                      value={editingSettings[setting.key] || ""}
-                      onChange={(e) =>
-                        setEditingSettings({
-                          ...editingSettings,
-                          [setting.key]: e.target.value,
-                        })
-                      }
-                      rows={3}
-                      className="w-full px-4 py-2 bg-background border border-border rounded-lg"
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      value={editingSettings[setting.key] || ""}
-                      onChange={(e) =>
-                        setEditingSettings({
-                          ...editingSettings,
-                          [setting.key]: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 bg-background border border-border rounded-lg"
-                    />
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={handleSaveSettings}
-                className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium"
-              >
-                <Save className="w-4 h-4" />
-                Save Settings
-              </button>
+              {settings.length === 0 ? (
+                <p className="text-muted-foreground">No settings configured yet.</p>
+              ) : (
+                settings.map((setting) => (
+                  <div key={setting.id}>
+                    <label className="block text-sm font-medium mb-2 capitalize">
+                      {setting.key.replace(/_/g, " ")}
+                    </label>
+                    {setting.key.includes("text") ||
+                    setting.key.includes("subtitle") ||
+                    setting.key.includes("quote") ||
+                    setting.key.includes("description") ? (
+                      <textarea
+                        value={editingSettings[setting.key] || ""}
+                        onChange={(e) =>
+                          setEditingSettings({
+                            ...editingSettings,
+                            [setting.key]: e.target.value,
+                          })
+                        }
+                        rows={3}
+                        className="w-full px-4 py-2 bg-background border border-border rounded-lg"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        value={editingSettings[setting.key] || ""}
+                        onChange={(e) =>
+                          setEditingSettings({
+                            ...editingSettings,
+                            [setting.key]: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 bg-background border border-border rounded-lg"
+                      />
+                    )}
+                  </div>
+                ))
+              )}
+              {settings.length > 0 && (
+                <button
+                  onClick={handleSaveSettings}
+                  className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Settings
+                </button>
+              )}
             </div>
           </div>
         )}

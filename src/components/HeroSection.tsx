@@ -1,7 +1,23 @@
+import { useState, useEffect } from "react";
 import { Instagram, Music, Heart } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.jpeg";
 
 const HeroSection = () => {
+  const [settings, setSettings] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase.from("site_settings").select("*");
+      if (data) {
+        const map: Record<string, string> = {};
+        data.forEach((s) => (map[s.key] = s.value));
+        setSettings(map);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   return (
     <section
       id="home"
@@ -30,12 +46,12 @@ const HeroSection = () => {
 
           {/* Title */}
           <h1 className="font-display font-bold text-4xl md:text-6xl lg:text-7xl text-secondary mb-4 animate-fade-up">
-            Bhakti Jamming Crew
+            {settings.hero_title || "Bhakti Jamming Crew"}
           </h1>
 
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-8 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            Where devotion meets rhythm. Join us in creating soulful music that connects hearts and elevates spirits.
+            {settings.hero_subtitle || "Where devotion meets rhythm. Join us in creating soulful music that connects hearts and elevates spirits."}
           </p>
 
           {/* Tags */}
@@ -73,11 +89,15 @@ const HeroSection = () => {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-8 md:gap-16 mt-16 animate-fade-up" style={{ animationDelay: "0.4s" }}>
             <div className="text-center">
-              <div className="font-display font-bold text-3xl md:text-4xl text-primary">50+</div>
+              <div className="font-display font-bold text-3xl md:text-4xl text-primary">
+                {settings.stat_sessions || "50+"}
+              </div>
               <div className="text-sm text-muted-foreground mt-1">Sessions</div>
             </div>
             <div className="text-center">
-              <div className="font-display font-bold text-3xl md:text-4xl text-primary">500+</div>
+              <div className="font-display font-bold text-3xl md:text-4xl text-primary">
+                {settings.stat_community || "500+"}
+              </div>
               <div className="text-sm text-muted-foreground mt-1">Community</div>
             </div>
             <div className="text-center">

@@ -53,14 +53,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const checkAdminStatus = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", userId)
-        .maybeSingle();
+      // Use the has_role function for secure role checking
+      const { data, error } = await supabase.rpc("has_role", {
+        _user_id: userId,
+        _role: "admin"
+      });
 
-      if (!error && data) {
-        setIsAdmin(data.is_admin || false);
+      if (!error) {
+        setIsAdmin(data || false);
+      } else {
+        // Fallback to profiles table check if has_role fails
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", userId)
+          .maybeSingle();
+
+        if (!profileError && profileData) {
+          setIsAdmin(profileData.is_admin || false);
+        }
       }
     } catch (err) {
       console.error("Error checking admin status:", err);
