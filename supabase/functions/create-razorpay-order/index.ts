@@ -65,7 +65,7 @@ serve(async (req) => {
       body: JSON.stringify({
         amount: amount * 100, // Razorpay expects amount in paise
         currency: "INR",
-        receipt: `event_${eventId}_${Date.now()}`,
+        receipt: `evt_${Date.now()}`,
         notes: {
           event_id: eventId,
           user_id: user.id,
