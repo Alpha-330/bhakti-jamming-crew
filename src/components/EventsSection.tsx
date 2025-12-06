@@ -105,21 +105,39 @@ const EventsSection = () => {
         description: `Registration for ${event.title}`,
         order_id: data.orderId,
         handler: async (response: any) => {
-          // Verify payment
-          const { error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-            body: {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              eventId: event.id,
-            },
-          });
+          console.log("Razorpay payment response:", response);
+          toast.loading("Verifying payment...");
+          try {
+            // Verify payment
+            const { data, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                eventId: event.id,
+              },
+            });
 
-          if (verifyError) {
-            toast.error("Payment verification failed");
-          } else {
-            toast.success("Payment successful! You're registered.");
+            console.log("Verification response:", data, verifyError);
+
+            if (verifyError) {
+              toast.dismiss();
+              toast.error("Payment verification failed. Please contact support.");
+            } else {
+              toast.dismiss();
+              toast.success("🎉 Payment successful! You're registered for " + event.title);
+            }
+          } catch (err) {
+            console.error("Verification error:", err);
+            toast.dismiss();
+            toast.error("Verification failed. Contact support with your payment ID.");
           }
+        },
+        modal: {
+          ondismiss: () => {
+            toast.info("Payment cancelled");
+            setRegistering(null);
+          },
         },
         prefill: {
           email: user.email,
