@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Music, Users, Heart, Mic2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import daiwikImg from "@/assets/founders/daiwik.jpg";
+import piyushImg from "@/assets/founders/piyush.jpg";
 
 const features = [
   {
@@ -22,6 +24,19 @@ const features = [
     icon: Mic2,
     title: "Live Sessions",
     description: "Regular jamming sessions where musicians and devotees come together to create magic.",
+  },
+];
+
+const founders = [
+  {
+    name: "Daiwik",
+    role: "Co-Founder",
+    image: daiwikImg,
+  },
+  {
+    name: "Piyush",
+    role: "Co-Founder",
+    image: piyushImg,
   },
 ];
 
@@ -55,6 +70,35 @@ const AboutSection = () => {
           <p className="text-muted-foreground text-lg">
             {settings.about_description || "Bhakti Jamming Crew is a passionate group of musicians and devotees united by our love for spiritual music. We believe in the transformative power of kirtan and bhajan to bring peace, joy, and connection to all."}
           </p>
+        </div>
+
+        {/* Founders Section */}
+        <div className="mb-20">
+          <h3 className="font-display font-bold text-2xl md:text-3xl text-secondary text-center mb-10">
+            Meet Our <span className="text-gradient">Founders</span>
+          </h3>
+          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+            {founders.map((founder) => (
+              <div key={founder.name} className="group text-center">
+                <div className="relative mb-4">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden ring-4 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
+                    <img
+                      src={founder.image}
+                      alt={founder.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+                <h4 className="font-display font-semibold text-xl text-secondary">
+                  {founder.name}
+                </h4>
+                <p className="text-primary font-medium text-sm">
+                  {founder.role}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Features Grid */}
