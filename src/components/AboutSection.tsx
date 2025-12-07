@@ -77,10 +77,10 @@ const AboutSection = () => {
           <h3 className="font-display font-bold text-2xl md:text-3xl text-secondary text-center mb-10">
             Meet Our <span className="text-gradient">Founders</span>
           </h3>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16">
             {founders.map((founder) => (
               <div key={founder.name} className="group text-center">
-                <div className="relative mb-4">
+                <div className="relative mb-4 flex justify-center">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="relative w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden ring-4 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
                     <img

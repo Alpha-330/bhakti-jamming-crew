@@ -1,4 +1,4 @@
-import { Instagram, Mail, Heart } from "lucide-react";
+import { Instagram, Heart } from "lucide-react";
 import logo from "@/assets/logo.jpeg";
 
 const Footer = () => {
@@ -38,7 +38,14 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h4 className="font-display font-semibold text-lg mb-4">Connect With Us</h4>
+            <a
+              href="https://chat.whatsapp.com/Dij2SY0OodQ7MXdy9VgX2D?mode=hqrt2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-display font-semibold text-lg mb-4 block hover:text-primary transition-colors duration-200"
+            >
+              Connect With Us
+            </a>
             <div className="space-y-4">
               <a
                 href="https://www.instagram.com/bhaktijammingcrew/"
@@ -48,13 +55,6 @@ const Footer = () => {
               >
                 <Instagram className="w-5 h-5" />
                 @bhaktijammingcrew
-              </a>
-              <a
-                href="mailto:contact@bhaktijamming.com"
-                className="flex items-center gap-3 text-secondary-foreground/70 hover:text-secondary-foreground transition-colors duration-200"
-              >
-                <Mail className="w-5 h-5" />
-                contact@bhaktijamming.com
               </a>
             </div>
           </div>
