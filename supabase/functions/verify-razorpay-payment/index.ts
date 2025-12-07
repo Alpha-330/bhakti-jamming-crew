@@ -12,11 +12,15 @@ serve(async (req) => {
   }
 
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, eventId } = await req.json();
+    const body = await req.json();
+    console.log("Received verification request:", JSON.stringify(body));
+
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, eventId } = body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !eventId) {
+      console.error("Missing fields:", { razorpay_order_id, razorpay_payment_id, razorpay_signature, eventId });
       return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
+        JSON.stringify({ error: "Missing required fields", details: { razorpay_order_id: !!razorpay_order_id, razorpay_payment_id: !!razorpay_payment_id, razorpay_signature: !!razorpay_signature, eventId: !!eventId } }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -24,8 +28,9 @@ serve(async (req) => {
     // Get auth user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
+      console.error("No authorization header");
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ error: "Unauthorized - No auth header" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -38,14 +43,18 @@ serve(async (req) => {
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
+      console.error("Auth error:", userError);
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ error: "Unauthorized - Invalid user" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    console.log("User authenticated:", user.id);
+
     const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
     if (!keySecret) {
+      console.error("RAZORPAY_KEY_SECRET not configured");
       return new Response(
         JSON.stringify({ error: "Payment gateway not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -71,48 +80,72 @@ serve(async (req) => {
       .map(b => b.toString(16).padStart(2, "0"))
       .join("");
 
+    console.log("Signature check - Expected:", expectedSignature.substring(0, 20) + "...", "Received:", razorpay_signature.substring(0, 20) + "...");
+
     if (expectedSignature !== razorpay_signature) {
       console.error("Signature mismatch");
       return new Response(
-        JSON.stringify({ error: "Invalid signature" }),
+        JSON.stringify({ error: "Invalid payment signature" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Payment verified successfully:", razorpay_payment_id);
+    console.log("Payment signature verified successfully");
 
-    // Update registration status
+    // Update registration status using service role
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { error: updateError } = await serviceClient
+    // First check if registration exists
+    const { data: existingReg, error: checkError } = await serviceClient
+      .from("event_registrations")
+      .select("id, status")
+      .eq("razorpay_order_id", razorpay_order_id)
+      .single();
+
+    if (checkError) {
+      console.error("Error finding registration:", checkError);
+      return new Response(
+        JSON.stringify({ error: "Registration not found", details: checkError.message }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Found registration:", existingReg);
+
+    // Update the registration
+    const { data: updateData, error: updateError } = await serviceClient
       .from("event_registrations")
       .update({
         status: "confirmed",
         razorpay_payment_id,
         razorpay_signature,
+        updated_at: new Date().toISOString(),
       })
       .eq("razorpay_order_id", razorpay_order_id)
-      .eq("user_id", user.id);
+      .select();
 
     if (updateError) {
       console.error("Failed to update registration:", updateError);
       return new Response(
-        JSON.stringify({ error: "Failed to confirm registration" }),
+        JSON.stringify({ error: "Failed to confirm registration", details: updateError.message }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    console.log("Registration updated successfully:", updateData);
+
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, message: "Payment verified and registration confirmed" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error) {
-    console.error("Error:", error);
+  } catch (error: unknown) {
+    console.error("Unexpected error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(
-      JSON.stringify({ error: "Internal server error" }),
+      JSON.stringify({ error: "Internal server error", details: errorMessage }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

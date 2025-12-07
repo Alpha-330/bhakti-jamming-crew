@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Menu, X, Instagram, Lock } from "lucide-react";
+import { Menu, X, Instagram, Lock, LogIn, LogOut, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 import logo from "@/assets/logo.jpeg";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
 
   const navLinks = [
     { name: "Home", href: "#home" },
@@ -14,6 +15,11 @@ const Navbar = () => {
     { name: "Gallery", href: "#gallery" },
     { name: "Contact", href: "#contact" },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsOpen(false);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
@@ -28,7 +34,7 @@ const Navbar = () => {
           </a>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <a
                 key={link.name}
@@ -45,16 +51,37 @@ const Navbar = () => {
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-200"
             >
               <Instagram className="w-4 h-4" />
-              <span className="text-sm font-medium">Follow Us</span>
+              <span className="text-sm font-medium">Follow</span>
             </a>
-            {user && isAdmin && (
-              <a
-                href="/admin"
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            
+            {/* Auth Buttons */}
+            {user ? (
+              <div className="flex items-center gap-3">
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Lock className="w-4 h-4" />
+                    Admin
+                  </Link>
+                )}
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-destructive transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/auth"
+                className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors duration-200"
               >
-                <Lock className="w-4 h-4" />
-                Admin
-              </a>
+                <LogIn className="w-4 h-4" />
+                <span className="text-sm font-medium">Sign In</span>
+              </Link>
             )}
           </div>
 
@@ -91,15 +118,37 @@ const Navbar = () => {
                 <Instagram className="w-4 h-4" />
                 <span className="text-sm font-medium">Follow Us</span>
               </a>
-              {user && isAdmin && (
-                <a
-                  href="/admin"
-                  className="flex items-center gap-2 text-base font-medium text-muted-foreground hover:text-primary"
+              
+              {/* Mobile Auth */}
+              {user ? (
+                <>
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      className="flex items-center gap-2 text-base font-medium text-muted-foreground hover:text-primary"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Lock className="w-4 h-4" />
+                      Admin Panel
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 text-base font-medium text-muted-foreground hover:text-destructive"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  className="flex items-center gap-2 px-4 py-3 bg-secondary text-secondary-foreground rounded-lg w-fit"
                   onClick={() => setIsOpen(false)}
                 >
-                  <Lock className="w-4 h-4" />
-                  Admin Panel
-                </a>
+                  <LogIn className="w-4 h-4" />
+                  <span className="text-sm font-medium">Sign In</span>
+                </Link>
               )}
             </div>
           </div>
