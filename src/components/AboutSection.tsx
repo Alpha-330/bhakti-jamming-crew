@@ -32,11 +32,13 @@ const founders = [
     name: "Daiwik",
     role: "Co-Founder",
     image: daiwikImg,
+    bio: "Driven by a divine calling to bridge spirituality and youth culture.",
   },
   {
     name: "Piyush",
     role: "Co-Founder",
     image: piyushImg,
+    bio: "Passionate about connecting today's generation with the divine through music.",
   },
 ];
 
@@ -93,8 +95,11 @@ const AboutSection = () => {
                 <h4 className="font-display font-semibold text-xl text-secondary">
                   {founder.name}
                 </h4>
-                <p className="text-primary font-medium text-sm">
+                <p className="text-primary font-medium text-sm mb-2">
                   {founder.role}
+                </p>
+                <p className="text-muted-foreground text-sm max-w-[200px]">
+                  {founder.bio}
                 </p>
               </div>
             ))}
