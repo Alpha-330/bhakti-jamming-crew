@@ -21,11 +21,42 @@ const EventsSection = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  // Live countdown timer
+  useEffect(() => {
+    if (events.length === 0) return;
+
+    const upcomingEvent = events[0];
+    
+    const updateCountdown = () => {
+      const eventDate = new Date(`${upcomingEvent.date}T${upcomingEvent.time_start}`);
+      const now = new Date();
+      const diff = eventDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setCountdown(null);
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setCountdown({ days, hours, minutes, seconds });
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [events]);
 
   const fetchEvents = async () => {
     const today = new Date().toISOString().split("T")[0];
@@ -56,20 +87,6 @@ const EventsSection = () => {
       day: date.getDate(),
       month: date.toLocaleString("default", { month: "short" }),
     };
-  };
-
-  const getCountdown = (dateStr: string, timeStr: string) => {
-    const eventDate = new Date(`${dateStr}T${timeStr}`);
-    const now = new Date();
-    const diff = eventDate.getTime() - now.getTime();
-
-    if (diff <= 0) return null;
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-    return { days, hours, minutes };
   };
 
   const handleRegister = async (event: Event) => {
@@ -244,30 +261,31 @@ const EventsSection = () => {
                           🎉 Next Event - Don't Miss Out!
                         </span>
                       </div>
-                      {(() => {
-                        const countdown = getCountdown(event.date, event.time_start);
-                        if (!countdown) return null;
-                        return (
-                          <div className="absolute top-12 left-0 right-0 bg-secondary/90 py-3 px-4">
-                            <div className="flex items-center justify-center gap-4 text-secondary-foreground">
-                              <div className="text-center">
-                                <span className="text-2xl font-bold">{countdown.days}</span>
-                                <span className="text-xs block opacity-80">Days</span>
-                              </div>
-                              <span className="text-xl font-light">:</span>
-                              <div className="text-center">
-                                <span className="text-2xl font-bold">{countdown.hours}</span>
-                                <span className="text-xs block opacity-80">Hours</span>
-                              </div>
-                              <span className="text-xl font-light">:</span>
-                              <div className="text-center">
-                                <span className="text-2xl font-bold">{countdown.minutes}</span>
-                                <span className="text-xs block opacity-80">Mins</span>
-                              </div>
+                      {countdown && (
+                        <div className="absolute top-12 left-0 right-0 bg-secondary/90 py-3 px-4">
+                          <div className="flex items-center justify-center gap-3 text-secondary-foreground">
+                            <div className="text-center">
+                              <span className="text-2xl font-bold">{countdown.days}</span>
+                              <span className="text-xs block opacity-80">Days</span>
+                            </div>
+                            <span className="text-xl font-light">:</span>
+                            <div className="text-center">
+                              <span className="text-2xl font-bold">{countdown.hours.toString().padStart(2, '0')}</span>
+                              <span className="text-xs block opacity-80">Hours</span>
+                            </div>
+                            <span className="text-xl font-light">:</span>
+                            <div className="text-center">
+                              <span className="text-2xl font-bold">{countdown.minutes.toString().padStart(2, '0')}</span>
+                              <span className="text-xs block opacity-80">Mins</span>
+                            </div>
+                            <span className="text-xl font-light">:</span>
+                            <div className="text-center">
+                              <span className="text-2xl font-bold">{countdown.seconds.toString().padStart(2, '0')}</span>
+                              <span className="text-xs block opacity-80">Secs</span>
                             </div>
                           </div>
-                        );
-                      })()}
+                        </div>
+                      )}
                     </>
                   )}
                   {event.featured && (
