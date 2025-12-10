@@ -209,15 +209,27 @@ const EventsSection = () => {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => {
+            {events.map((event, index) => {
               const { day, month } = formatDate(event.date);
+              const isUpcoming = index === 0;
               return (
                 <div
                   key={event.id}
                   className={`group relative bg-card rounded-2xl border overflow-hidden card-hover ${
-                    event.featured ? "border-primary/50 shadow-glow" : "border-border"
+                    isUpcoming
+                      ? "border-primary shadow-glow ring-2 ring-primary/30 md:scale-105"
+                      : event.featured
+                      ? "border-primary/50 shadow-glow"
+                      : "border-border"
                   }`}
                 >
+                  {isUpcoming && (
+                    <div className="absolute -top-0 left-0 right-0 bg-gradient-to-r from-primary to-accent py-2 text-center">
+                      <span className="text-primary-foreground text-sm font-semibold animate-pulse">
+                        🎉 Next Event - Don't Miss Out!
+                      </span>
+                    </div>
+                  )}
                   {event.featured && (
                     <div className="absolute top-4 right-4 z-10">
                       <span className="flex items-center gap-1 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
@@ -227,15 +239,19 @@ const EventsSection = () => {
                     </div>
                   )}
 
-                  <div className="p-6">
+                  <div className={`p-6 ${isUpcoming ? "pt-12" : ""}`}>
                     {/* Date Badge */}
                     <div className="flex items-start gap-4 mb-4">
-                      <div className="flex-shrink-0 w-16 h-16 bg-primary/10 rounded-xl flex flex-col items-center justify-center">
-                        <span className="text-2xl font-bold text-primary">{day}</span>
-                        <span className="text-xs uppercase text-primary/80">{month}</span>
+                      <div className={`flex-shrink-0 w-16 h-16 rounded-xl flex flex-col items-center justify-center ${
+                        isUpcoming ? "bg-primary text-primary-foreground" : "bg-primary/10"
+                      }`}>
+                        <span className={`text-2xl font-bold ${isUpcoming ? "" : "text-primary"}`}>{day}</span>
+                        <span className={`text-xs uppercase ${isUpcoming ? "text-primary-foreground/80" : "text-primary/80"}`}>{month}</span>
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-display font-semibold text-xl text-secondary mb-1 group-hover:text-primary transition-colors">
+                        <h3 className={`font-display font-semibold text-xl mb-1 group-hover:text-primary transition-colors ${
+                          isUpcoming ? "text-primary" : "text-secondary"
+                        }`}>
                           {event.title}
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">

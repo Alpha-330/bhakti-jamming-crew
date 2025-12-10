@@ -1,42 +1,25 @@
 import { Instagram, ExternalLink } from "lucide-react";
 
+import gallery1 from "@/assets/gallery/gallery-1.jpg";
+import gallery2 from "@/assets/gallery/gallery-2.jpg";
+import gallery3 from "@/assets/gallery/gallery-3.jpg";
+import gallery4 from "@/assets/gallery/gallery-4.jpg";
+import gallery5 from "@/assets/gallery/gallery-5.jpg";
+import gallery6 from "@/assets/gallery/gallery-6.jpg";
+import gallery7 from "@/assets/gallery/gallery-7.jpg";
+import gallery8 from "@/assets/gallery/gallery-8.jpg";
+import gallery9 from "@/assets/gallery/gallery-9.jpg";
+
 const galleryImages = [
-  {
-    id: 1,
-    alt: "Kirtan session with harmonium",
-    gradient: "from-primary/80 to-accent/60",
-    icon: "🎹",
-  },
-  {
-    id: 2,
-    alt: "Group bhajan performance",
-    gradient: "from-secondary/80 to-brown-light/60",
-    icon: "🎤",
-  },
-  {
-    id: 3,
-    alt: "Dholak rhythm session",
-    gradient: "from-accent/80 to-primary/60",
-    icon: "🪘",
-  },
-  {
-    id: 4,
-    alt: "Community gathering",
-    gradient: "from-brown-light/80 to-secondary/60",
-    icon: "🙏",
-  },
-  {
-    id: 5,
-    alt: "Evening kirtan",
-    gradient: "from-primary/70 to-secondary/50",
-    icon: "🌅",
-  },
-  {
-    id: 6,
-    alt: "Musical instruments",
-    gradient: "from-accent/70 to-primary/50",
-    icon: "🎶",
-  },
+  { id: 1, src: gallery1, alt: "Harmonium kirtan session" },
+  { id: 2, src: gallery2, alt: "Vocalist singing bhajans" },
+  { id: 3, src: gallery3, alt: "Live bhakti performance" },
+  { id: 4, src: gallery4, alt: "Community gathering" },
+  { id: 5, src: gallery5, alt: "Audience in devotion" },
+  { id: 6, src: gallery6, alt: "Evening kirtan crowd" },
+  { id: 7, src: gallery7, alt: "Hands raised in worship" },
+  { id: 8, src: gallery8, alt: "Joyful crowd celebration" },
+  { id: 9, src: gallery9, alt: "Stage performance" },
 ];
 
 const GallerySection = () => {
@@ -66,10 +49,11 @@ const GallerySection = () => {
                 index === 0 ? "md:col-span-2 md:row-span-2" : ""
               }`}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${image.gradient}`} />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-4xl md:text-6xl opacity-50">{image.icon}</span>
-              </div>
+              <img
+                src={image.src}
+                alt={image.alt}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
               <div className="absolute inset-0 bg-secondary/0 group-hover:bg-secondary/40 transition-all duration-300 flex items-center justify-center">
                 <ExternalLink className="w-8 h-8 text-secondary-foreground opacity-0 group-hover:opacity-100 transform scale-50 group-hover:scale-100 transition-all duration-300" />
               </div>
