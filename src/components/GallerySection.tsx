@@ -14,6 +14,8 @@ import gallery6 from "@/assets/gallery/gallery-6.jpg";
 import gallery7 from "@/assets/gallery/gallery-7.jpg";
 import gallery8 from "@/assets/gallery/gallery-8.jpg";
 import gallery9 from "@/assets/gallery/gallery-9.jpg";
+import gallery10 from "@/assets/gallery/gallery-10.jpg";
+import gallery11 from "@/assets/gallery/gallery-11.jpg";
 
 const galleryImages = [
   { id: 1, src: gallery1, alt: "Harmonium kirtan session", size: "large" },
@@ -25,6 +27,8 @@ const galleryImages = [
   { id: 7, src: gallery7, alt: "Hands raised in worship", size: "small" },
   { id: 8, src: gallery8, alt: "Joyful crowd celebration", size: "large" },
   { id: 9, src: gallery9, alt: "Stage performance", size: "small" },
+  { id: 10, src: gallery10, alt: "Team group photo at Drink Inn", size: "large" },
+  { id: 11, src: gallery11, alt: "Bhakti Jamming Crew ensemble", size: "small" },
 ];
 
 const GallerySection = () => {
