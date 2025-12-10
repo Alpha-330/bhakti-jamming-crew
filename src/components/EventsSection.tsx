@@ -58,6 +58,20 @@ const EventsSection = () => {
     };
   };
 
+  const getCountdown = (dateStr: string, timeStr: string) => {
+    const eventDate = new Date(`${dateStr}T${timeStr}`);
+    const now = new Date();
+    const diff = eventDate.getTime() - now.getTime();
+
+    if (diff <= 0) return null;
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    return { days, hours, minutes };
+  };
+
   const handleRegister = async (event: Event) => {
     if (!user) {
       toast.error("Please sign in to register for events");
@@ -224,11 +238,37 @@ const EventsSection = () => {
                   }`}
                 >
                   {isUpcoming && (
-                    <div className="absolute -top-0 left-0 right-0 bg-gradient-to-r from-primary to-accent py-2 text-center">
-                      <span className="text-primary-foreground text-sm font-semibold animate-pulse">
-                        🎉 Next Event - Don't Miss Out!
-                      </span>
-                    </div>
+                    <>
+                      <div className="absolute -top-0 left-0 right-0 bg-gradient-to-r from-primary to-accent py-2 text-center">
+                        <span className="text-primary-foreground text-sm font-semibold animate-pulse">
+                          🎉 Next Event - Don't Miss Out!
+                        </span>
+                      </div>
+                      {(() => {
+                        const countdown = getCountdown(event.date, event.time_start);
+                        if (!countdown) return null;
+                        return (
+                          <div className="absolute top-12 left-0 right-0 bg-secondary/90 py-3 px-4">
+                            <div className="flex items-center justify-center gap-4 text-secondary-foreground">
+                              <div className="text-center">
+                                <span className="text-2xl font-bold">{countdown.days}</span>
+                                <span className="text-xs block opacity-80">Days</span>
+                              </div>
+                              <span className="text-xl font-light">:</span>
+                              <div className="text-center">
+                                <span className="text-2xl font-bold">{countdown.hours}</span>
+                                <span className="text-xs block opacity-80">Hours</span>
+                              </div>
+                              <span className="text-xl font-light">:</span>
+                              <div className="text-center">
+                                <span className="text-2xl font-bold">{countdown.minutes}</span>
+                                <span className="text-xs block opacity-80">Mins</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </>
                   )}
                   {event.featured && (
                     <div className="absolute top-4 right-4 z-10">
@@ -239,7 +279,7 @@ const EventsSection = () => {
                     </div>
                   )}
 
-                  <div className={`p-6 ${isUpcoming ? "pt-12" : ""}`}>
+                  <div className={`p-6 ${isUpcoming ? "pt-24" : ""}`}>
                     {/* Date Badge */}
                     <div className="flex items-start gap-4 mb-4">
                       <div className={`flex-shrink-0 w-16 h-16 rounded-xl flex flex-col items-center justify-center ${
