@@ -30,6 +30,7 @@ interface TempRegistration {
   name: string;
   phone_number: string;
   email: string;
+  referral_source: string | null;
   created_at: string;
 }
 
@@ -109,9 +110,9 @@ const Admin = () => {
 
   const exportTempRegistrations = () => {
     const csvContent = [
-      ["Name", "Phone", "Email", "Registered At"].join(","),
+      ["Name", "Phone", "Email", "Heard About Us", "Registered At"].join(","),
       ...tempRegistrations.map((r) =>
-        [r.name, r.phone_number, r.email, new Date(r.created_at).toLocaleString()].join(",")
+        [r.name, r.phone_number, r.email, r.referral_source || "", new Date(r.created_at).toLocaleString()].join(",")
       ),
     ].join("\n");
 
@@ -597,6 +598,7 @@ const Admin = () => {
                         <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Name</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Phone</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Email</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Heard About Us</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Registered</th>
                         <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Actions</th>
                       </tr>
@@ -607,6 +609,7 @@ const Admin = () => {
                           <td className="px-4 py-3 text-sm font-medium">{reg.name}</td>
                           <td className="px-4 py-3 text-sm text-muted-foreground">{reg.phone_number}</td>
                           <td className="px-4 py-3 text-sm text-muted-foreground">{reg.email}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground capitalize">{reg.referral_source || "-"}</td>
                           <td className="px-4 py-3 text-sm text-muted-foreground">
                             {new Date(reg.created_at).toLocaleString()}
                           </td>

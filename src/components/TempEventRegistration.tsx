@@ -1,20 +1,29 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CheckCircle, Calendar, MapPin, User, Phone, Mail } from "lucide-react";
+import { CheckCircle, Calendar, MapPin, User, Phone, Mail, HelpCircle } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const TempEventRegistration = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [referralSource, setReferralSource] = useState("");
+  const [otherSource, setOtherSource] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim() || !phone.trim() || !email.trim()) {
+    if (!name.trim() || !phone.trim() || !email.trim() || !referralSource) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (referralSource === "other" && !otherSource.trim()) {
+      toast.error("Please specify how you heard about us");
       return;
     }
 
@@ -34,12 +43,15 @@ const TempEventRegistration = () => {
 
     setIsSubmitting(true);
 
+    const finalReferralSource = referralSource === "other" ? otherSource.trim() : referralSource;
+
     const { error } = await supabase
       .from("temp_event_registrations")
       .insert({
         name: name.trim(),
         phone_number: phone.trim(),
         email: email.trim().toLowerCase(),
+        referral_source: finalReferralSource,
       });
 
     setIsSubmitting(false);
@@ -150,6 +162,40 @@ const TempEventRegistration = () => {
                   required
                   className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 />
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium mb-3">
+                  <HelpCircle className="w-4 h-4 text-primary" />
+                  How did you hear about us? *
+                </label>
+                <RadioGroup value={referralSource} onValueChange={setReferralSource} className="space-y-3">
+                  <div className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="instagram" id="instagram" />
+                    <Label htmlFor="instagram" className="cursor-pointer flex-1">Instagram</Label>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="friend" id="friend" />
+                    <Label htmlFor="friend" className="cursor-pointer flex-1">Friend Recommendation</Label>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="whatsapp" id="whatsapp" />
+                    <Label htmlFor="whatsapp" className="cursor-pointer flex-1">WhatsApp</Label>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="other" id="other" />
+                    <Label htmlFor="other" className="cursor-pointer flex-1">Other</Label>
+                  </div>
+                </RadioGroup>
+                {referralSource === "other" && (
+                  <input
+                    type="text"
+                    value={otherSource}
+                    onChange={(e) => setOtherSource(e.target.value)}
+                    placeholder="Please specify..."
+                    className="w-full mt-3 px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  />
+                )}
               </div>
 
               <button
