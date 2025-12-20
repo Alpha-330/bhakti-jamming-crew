@@ -29,16 +29,16 @@ const features = [
 
 const founders = [
   {
-    name: "Daiwik",
+    name: "Daiwik Agarwal",
     role: "Co-Founder",
     image: daiwikImg,
-    bio: "Driven by a divine calling to bridge spirituality and youth culture.",
+    bio: "What began as a small idea has now become a beautiful family connected through devotion and music. Our mission is to create a space where positive energy flows, voices unite, and strangers become family. 🙏✨",
   },
   {
-    name: "Piyush",
+    name: "Piyush Hardasani",
     role: "Co-Founder",
     image: piyushImg,
-    bio: "Passionate about connecting today's generation with the divine through music.",
+    bio: "Music and creativity are the shortest bridges between two souls. We aren't just building a group; we are building a movement of joy. Let's keep the harmony flowing—one beat at a time! 🌟",
   },
 ];
 
