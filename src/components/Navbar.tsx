@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Menu, X, Instagram, Lock, LogIn, LogOut, User } from "lucide-react";
+import { Menu, X, Instagram, Lock, LogIn, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.jpeg";
+import MyBookings from "./MyBookings";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,6 +58,7 @@ const Navbar = () => {
             {/* Auth Buttons */}
             {user ? (
               <div className="flex items-center gap-3">
+                <MyBookings />
                 {isAdmin && (
                   <Link
                     to="/admin"
