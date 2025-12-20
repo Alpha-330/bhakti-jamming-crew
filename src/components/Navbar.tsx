@@ -14,7 +14,7 @@ const Navbar = () => {
     { name: "About", href: "#about" },
     { name: "Events", href: "#events" },
     { name: "Gallery", href: "#gallery" },
-    { name: "Contact", href: "#contact" },
+    { name: "Contact", href: "https://chat.whatsapp.com/Dij2SY0OodQ7MXdy9VgX2D", external: true },
   ];
 
   const handleSignOut = async () => {
@@ -40,6 +40,8 @@ const Navbar = () => {
               <a
                 key={link.name}
                 href={link.href}
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noopener noreferrer" : undefined}
                 className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200"
               >
                 {link.name}
@@ -105,6 +107,8 @@ const Navbar = () => {
                 <a
                   key={link.name}
                   href={link.href}
+                  target={link.external ? "_blank" : undefined}
+                  rel={link.external ? "noopener noreferrer" : undefined}
                   className="text-base font-medium text-foreground hover:text-primary transition-colors duration-200"
                   onClick={() => setIsOpen(false)}
                 >
