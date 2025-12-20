@@ -39,7 +39,7 @@ const Footer = () => {
           {/* Contact */}
           <div>
             <a
-              href="https://chat.whatsapp.com/Dij2SY0OodQ7MXdy9VgX2D?mode=hqrt2"
+              href="https://chat.whatsapp.com/Dij2SY0OodQ7MXdy9VgX2D"
               target="_blank"
               rel="noopener noreferrer"
               className="font-display font-semibold text-lg mb-4 block hover:text-primary transition-colors duration-200"
