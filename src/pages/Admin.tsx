@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, Calendar, Settings, Plus, Edit2, Trash2, ArrowLeft, Save, Users, IndianRupee } from "lucide-react";
+import { LogOut, Calendar, Settings, Plus, Edit2, Trash2, ArrowLeft, Save, Users, IndianRupee, ClipboardList, Download } from "lucide-react";
 import logo from "@/assets/logo.jpeg";
 
 interface Event {
@@ -25,12 +25,21 @@ interface SiteSetting {
   value: string;
 }
 
+interface TempRegistration {
+  id: string;
+  name: string;
+  phone_number: string;
+  email: string;
+  created_at: string;
+}
+
 const Admin = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"events" | "settings">("events");
+  const [activeTab, setActiveTab] = useState<"events" | "settings" | "dec-registrations">("events");
   const [events, setEvents] = useState<Event[]>([]);
   const [settings, setSettings] = useState<SiteSetting[]>([]);
+  const [tempRegistrations, setTempRegistrations] = useState<TempRegistration[]>([]);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [editingSettings, setEditingSettings] = useState<Record<string, string>>({});
   const [showEventForm, setShowEventForm] = useState(false);
@@ -44,6 +53,7 @@ const Admin = () => {
   useEffect(() => {
     fetchEvents();
     fetchSettings();
+    fetchTempRegistrations();
   }, []);
 
   const fetchEvents = async () => {
@@ -68,6 +78,50 @@ const Admin = () => {
       });
       setEditingSettings(settingsMap);
     }
+  };
+
+  const fetchTempRegistrations = async () => {
+    const { data, error } = await supabase
+      .from("temp_event_registrations")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setTempRegistrations(data);
+    }
+  };
+
+  const handleDeleteTempRegistration = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this registration?")) return;
+
+    const { error } = await supabase
+      .from("temp_event_registrations")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Failed to delete registration");
+    } else {
+      toast.success("Registration deleted");
+      fetchTempRegistrations();
+    }
+  };
+
+  const exportTempRegistrations = () => {
+    const csvContent = [
+      ["Name", "Phone", "Email", "Registered At"].join(","),
+      ...tempRegistrations.map((r) =>
+        [r.name, r.phone_number, r.email, new Date(r.created_at).toLocaleString()].join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "21-dec-event-registrations.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   const handleLogout = async () => {
@@ -234,6 +288,17 @@ const Admin = () => {
           >
             <Settings className="w-4 h-4" />
             Settings
+          </button>
+          <button
+            onClick={() => setActiveTab("dec-registrations")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === "dec-registrations"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <ClipboardList className="w-4 h-4" />
+            21 Dec Registrations
           </button>
         </div>
 
@@ -498,6 +563,70 @@ const Admin = () => {
                   Save Settings
                 </button>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* 21 Dec Registrations Tab */}
+        {activeTab === "dec-registrations" && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display font-bold text-2xl text-secondary">
+                21 Dec Event Registrations
+              </h2>
+              <button
+                onClick={exportTempRegistrations}
+                disabled={tempRegistrations.length === 0}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium disabled:opacity-50"
+              >
+                <Download className="w-4 h-4" />
+                Export CSV
+              </button>
+            </div>
+
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              {tempRegistrations.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground">
+                  No registrations yet.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Name</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Phone</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Email</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Registered</th>
+                        <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {tempRegistrations.map((reg) => (
+                        <tr key={reg.id} className="hover:bg-muted/30 transition-colors">
+                          <td className="px-4 py-3 text-sm font-medium">{reg.name}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{reg.phone_number}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{reg.email}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">
+                            {new Date(reg.created_at).toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              onClick={() => handleDeleteTempRegistration(reg.id)}
+                              className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              <div className="px-4 py-3 bg-muted/30 border-t border-border text-sm text-muted-foreground">
+                Total: {tempRegistrations.length} registration(s)
+              </div>
             </div>
           </div>
         )}

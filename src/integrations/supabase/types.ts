@@ -172,6 +172,30 @@ export type Database = {
         }
         Relationships: []
       }
+      temp_event_registrations: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone_number: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone_number: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone_number?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
