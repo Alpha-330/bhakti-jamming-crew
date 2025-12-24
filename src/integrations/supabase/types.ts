@@ -174,6 +174,9 @@ export type Database = {
       }
       temp_event_registrations: {
         Row: {
+          booking_code: string | null
+          checked_in: boolean | null
+          checked_in_at: string | null
           created_at: string
           email: string
           id: string
@@ -182,6 +185,9 @@ export type Database = {
           referral_source: string | null
         }
         Insert: {
+          booking_code?: string | null
+          checked_in?: boolean | null
+          checked_in_at?: string | null
           created_at?: string
           email: string
           id?: string
@@ -190,6 +196,9 @@ export type Database = {
           referral_source?: string | null
         }
         Update: {
+          booking_code?: string | null
+          checked_in?: boolean | null
+          checked_in_at?: string | null
           created_at?: string
           email?: string
           id?: string
