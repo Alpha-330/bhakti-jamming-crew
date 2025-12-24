@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CheckCircle, Calendar, MapPin, User, Phone, Mail, HelpCircle } from "lucide-react";
+import { CheckCircle, Calendar, MapPin, User, Phone, Mail, HelpCircle, Download } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { QRCodeSVG } from "qrcode.react";
+
+interface RegistrationData {
+  bookingCode: string;
+  name: string;
+}
 
 const TempEventRegistration = () => {
   const [name, setName] = useState("");
@@ -12,7 +18,7 @@ const TempEventRegistration = () => {
   const [referralSource, setReferralSource] = useState("");
   const [otherSource, setOtherSource] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false);
+  const [registrationData, setRegistrationData] = useState<RegistrationData | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,14 +51,16 @@ const TempEventRegistration = () => {
 
     const finalReferralSource = referralSource === "other" ? otherSource.trim() : referralSource;
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("temp_event_registrations")
       .insert({
         name: name.trim(),
         phone_number: phone.trim(),
         email: email.trim().toLowerCase(),
         referral_source: finalReferralSource,
-      });
+      })
+      .select("booking_code")
+      .single();
 
     setIsSubmitting(false);
 
@@ -60,12 +68,40 @@ const TempEventRegistration = () => {
       toast.error("Registration failed. Please try again.");
       console.error("Registration error:", error);
     } else {
-      setIsRegistered(true);
+      setRegistrationData({
+        bookingCode: data.booking_code,
+        name: name.trim(),
+      });
       toast.success("Registration successful!");
     }
   };
 
-  if (isRegistered) {
+  const downloadQRCode = () => {
+    const svg = document.getElementById("booking-qr-code");
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx?.drawImage(img, 0, 0);
+      const pngFile = canvas.toDataURL("image/png");
+      const downloadLink = document.createElement("a");
+      downloadLink.download = `BJC-Booking-${registrationData?.bookingCode}.png`;
+      downloadLink.href = pngFile;
+      downloadLink.click();
+    };
+    
+    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+  };
+
+  if (registrationData) {
+    const qrValue = `BJC:${registrationData.bookingCode}`;
+    
     return (
       <section id="dec-event" className="py-16 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto px-4">
@@ -77,9 +113,39 @@ const TempEventRegistration = () => {
               <h2 className="font-display font-bold text-2xl text-secondary mb-2">
                 Registration Confirmed!
               </h2>
-              <p className="text-muted-foreground mb-4">
-                Thank you for registering for our event on 21st December at Atal Udyan.
+              <p className="text-muted-foreground mb-6">
+                Thank you for registering, <span className="font-semibold text-foreground">{registrationData.name}</span>!
               </p>
+              
+              {/* QR Code Section */}
+              <div className="bg-background rounded-xl p-6 mb-6 border border-border">
+                <p className="text-sm font-medium mb-4">Your Entry QR Code</p>
+                <div className="flex justify-center mb-4">
+                  <div className="bg-white p-4 rounded-lg">
+                    <QRCodeSVG 
+                      id="booking-qr-code"
+                      value={qrValue} 
+                      size={180}
+                      level="H"
+                      includeMargin={true}
+                    />
+                  </div>
+                </div>
+                <div className="bg-primary/10 rounded-lg p-3 mb-4">
+                  <p className="text-xs text-muted-foreground mb-1">Booking Code</p>
+                  <p className="font-mono text-2xl font-bold text-primary tracking-wider">
+                    {registrationData.bookingCode}
+                  </p>
+                </div>
+                <button
+                  onClick={downloadQRCode}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg text-sm font-medium hover:bg-secondary/90 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Download QR Code
+                </button>
+              </div>
+              
               <div className="bg-muted/50 rounded-lg p-4 text-left space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="w-4 h-4 text-primary" />
@@ -91,7 +157,7 @@ const TempEventRegistration = () => {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mt-4">
-                We'll see you there! 🎉
+                Show this QR code at the entry for quick check-in! 🎉
               </p>
             </div>
           </div>
