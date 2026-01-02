@@ -269,7 +269,7 @@ const TempEventRegistration = () => {
                 disabled={isSubmitting}
                 className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? "Registering..." : "Register Now"}
+                {isSubmitting ? "Processing..." : "Register & Pay ₹49"}
               </button>
             </form>
           </div>
