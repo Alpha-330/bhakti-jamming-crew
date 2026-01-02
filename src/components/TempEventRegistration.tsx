@@ -149,11 +149,11 @@ const TempEventRegistration = () => {
               <div className="bg-muted/50 rounded-lg p-4 text-left space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="w-4 h-4 text-primary" />
-                  <span>21st December 2024</span>
+                  <span>11th January 2025</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="w-4 h-4 text-primary" />
-                  <span>Atal Udyan (I Love Agra Selfie Point)</span>
+                  <span>Agra</span>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mt-4">
@@ -175,11 +175,11 @@ const TempEventRegistration = () => {
               Special Event
             </span>
             <h2 className="font-display font-bold text-3xl md:text-4xl text-secondary mb-2">
-              21 Dec Event Registration
+              11 Jan Event Registration
             </h2>
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <MapPin className="w-4 h-4" />
-              <span>Atal Udyan (I Love Agra Selfie Point)</span>
+              <span>Agra</span>
             </div>
           </div>
 
