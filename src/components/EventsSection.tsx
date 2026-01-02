@@ -139,6 +139,19 @@ const EventsSection = () => {
 
     // Paid event - initiate Razorpay payment
     setRegistering(event.id);
+    
+    // Check if Razorpay SDK is loaded
+    if (typeof (window as any).Razorpay === 'undefined') {
+      toast.error("Payment gateway is loading. Please try again in a moment.");
+      setRegistering(null);
+      // Try to load SDK dynamically
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      document.body.appendChild(script);
+      return;
+    }
+    
     try {
       console.log("Creating Razorpay order for event:", event.id);
       const { data, error } = await supabase.functions.invoke("create-razorpay-order", {
@@ -156,7 +169,14 @@ const EventsSection = () => {
 
       if (!data?.orderId) {
         console.error("No order ID in response:", data);
-        toast.error("Failed to create payment order");
+        toast.error("Failed to create payment order. Please try again.");
+        setRegistering(null);
+        return;
+      }
+      
+      if (!data?.keyId) {
+        console.error("No key ID in response:", data);
+        toast.error("Payment configuration error. Please contact support.");
         setRegistering(null);
         return;
       }
@@ -198,7 +218,7 @@ const EventsSection = () => {
                 amount: event.price || 0,
                 paymentId: response.razorpay_payment_id,
               });
-              toast.success("Payment successful!");
+              toast.success("Payment successful! You're registered for the event.");
             }
           } catch (err) {
             console.error("Verification error:", err);
@@ -212,6 +232,8 @@ const EventsSection = () => {
             toast.info("Payment cancelled");
             setRegistering(null);
           },
+          escape: true,
+          animation: true,
         },
         prefill: {
           email: user.email,
@@ -219,18 +241,27 @@ const EventsSection = () => {
         theme: {
           color: "#E07B39",
         },
+        retry: {
+          enabled: true,
+          max_count: 3
+        },
+        notes: {
+          event_id: event.id,
+          event_title: event.title,
+        },
       };
 
       const razorpay = new (window as any).Razorpay(options);
       razorpay.on("payment.failed", (response: any) => {
         console.error("Payment failed:", response.error);
-        toast.error("Payment failed: " + response.error.description);
+        const errorMsg = response.error?.description || response.error?.reason || "Payment failed";
+        toast.error(`Payment failed: ${errorMsg}. Please try again.`);
         setRegistering(null);
       });
       razorpay.open();
     } catch (err) {
       console.error("Payment initiation error:", err);
-      toast.error("Failed to initiate payment");
+      toast.error("Failed to initiate payment. Please check your connection and try again.");
       setRegistering(null);
     }
   };

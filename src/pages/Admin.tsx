@@ -120,7 +120,7 @@ const Admin = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "21-dec-event-registrations.csv";
+    a.download = "11-jan-event-registrations.csv";
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -299,7 +299,7 @@ const Admin = () => {
             }`}
           >
             <ClipboardList className="w-4 h-4" />
-            21 Dec Registrations
+            11 Jan Registrations
           </button>
         </div>
 

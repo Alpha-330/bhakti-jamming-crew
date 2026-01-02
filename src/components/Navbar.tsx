@@ -12,7 +12,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", href: "#home" },
     { name: "About", href: "#about" },
-    { name: "21 Dec Event", href: "#dec-event" },
+    { name: "11 Jan Event", href: "#dec-event" },
     { name: "Events", href: "#events" },
     { name: "Gallery", href: "#gallery" },
     { name: "Contact", href: "https://chat.whatsapp.com/Dij2SY0OodQ7MXdy9VgX2D", external: true },
